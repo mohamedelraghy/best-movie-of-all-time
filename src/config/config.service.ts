@@ -82,4 +82,11 @@ export class ConfigService {
   get apiUrl(): string {
     return this.envConfig.API_URL;
   }
+
+  get TMDB() {
+    return { api_key: this.envConfig.TMDB_API_KEY };
+  }
+  get IMDB() {
+    return { api_key: this.envConfig.IMDB_API_KEY };
+  }
 }
