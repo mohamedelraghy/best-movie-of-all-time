@@ -2,9 +2,15 @@ import { Module } from '@nestjs/common';
 
 import { MoviesModule } from './movies/movies.module';
 import { CoreModule } from './core/core.module';
+import { ConfigModule } from './config/config.module';
+import { ConfigModuleConfig } from './config/options/config.config';
 
 @Module({
-  imports: [CoreModule, MoviesModule],
+  imports: [
+    CoreModule,
+    ConfigModule.forRootAsync(ConfigModule, { useClass: ConfigModuleConfig }),
+    MoviesModule,
+  ],
   controllers: [],
   providers: [],
 })
