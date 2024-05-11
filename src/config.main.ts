@@ -1,5 +1,5 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
@@ -7,7 +7,6 @@ import { rateLimit } from 'express-rate-limit';
 import { v4 as uuidv4 } from 'uuid';
 import helmet from 'helmet';
 import cookieSession = require('cookie-session');
-import { join } from 'path';
 
 import { ConfigService } from './config/config.service';
 import { initSwagger } from './swagger';
@@ -16,7 +15,7 @@ export function configure(
   app: NestExpressApplication,
   config: ConfigService,
 ): void {
-  app.useStaticAssets(join(__dirname, '..', 'upload'));
+  app.enableVersioning({ type: VersioningType.URI });
 
   app.set('trust proxy', 1); // trust first proxy
   app.use(
