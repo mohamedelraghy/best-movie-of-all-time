@@ -1,34 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { MoviesService } from './movies.service';
-import { CreateMovieDto } from './dto/create-movie.dto';
-import { UpdateMovieDto } from './dto/update-movie.dto';
+import {
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
-@Controller('movies')
+import { MoviesService } from './movies.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+@ApiTags('movies')
+@Controller({ version: '1', path: 'movies' })
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
-  @Post()
-  create(@Body() createMovieDto: CreateMovieDto) {
-    return this.moviesService.create(createMovieDto);
-  }
+  @Post('sync')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async syncMovies(
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    console.log({ file });
+    // * 1- Get CSV file buffer
+    const { buffer } = file;
 
-  @Get()
-  findAll() {
-    return this.moviesService.findAll();
-  }
+    // * 2- parse csv file
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.moviesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
-    return this.moviesService.update(+id, updateMovieDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.moviesService.remove(+id);
+    // * 3- save movies to db
   }
 }
