@@ -3,12 +3,10 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
 import * as csvParser from 'csv-parser';
 import { createReadStream } from 'fs';
 
@@ -31,7 +29,6 @@ export class MoviesController {
   async syncMovies(
     @UploadedFile()
     file: Express.Multer.File,
-    @Res() res: Response,
   ) {
     console.log({ file });
     // * 1- Get CSV file path
@@ -42,11 +39,12 @@ export class MoviesController {
     const results = [];
     createReadStream(path)
       .pipe(csvParser())
-      .on('data', (data) => results.push(data))
-      .on('end', () => {
-        console.log({ results });
-        res.json(results);
-      });
+      .on('data', async (data) => {
+        results.push(data);
+        console.log({ data });
+        await this.moviesService.enrichMovieData(data.Title, data.Year);
+      })
+      .on('end', () => {});
 
     // * 3- save movies to db
   }
