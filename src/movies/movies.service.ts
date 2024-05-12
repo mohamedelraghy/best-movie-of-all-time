@@ -8,6 +8,8 @@ import { Model } from 'mongoose';
 import { ConfigService } from 'src/config/config.service';
 import { BaseService } from 'src/core/shared/base.service';
 import { Movie, MovieDoc } from './entities/movie.entity';
+import { SearchOptions } from 'src/core/shared/search-options.dto';
+import { Pagination } from 'src/core/shared/pagination.dto';
 
 @Injectable()
 export class MoviesService extends BaseService<MovieDoc> {
@@ -105,6 +107,76 @@ export class MoviesService extends BaseService<MovieDoc> {
       console.error('Error enriching movie data:', error);
       throw error;
     }
+  }
+
+  async findAll(options: SearchOptions): Promise<Pagination> {
+    const aggregation = [];
+
+    const {
+      sort,
+      dir,
+      offset,
+      size,
+      searchTerm,
+      filterBy,
+      filterByDateFrom,
+      filterByDateTo,
+    } = options;
+
+    if (sort?.length && dir) {
+      this.sort(aggregation, sort, dir);
+    }
+
+    if (filterBy?.length) {
+      this.filter(aggregation, filterBy);
+    }
+
+    if (searchTerm) {
+      this.search(aggregation, searchTerm);
+    }
+
+    if (filterByDateFrom && filterByDateTo) {
+      aggregation.push(
+        //change date to string & match
+        {
+          $addFields: {
+            createdAtToString: {
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+            },
+          },
+        },
+        {
+          $match: {
+            $and: [
+              {
+                $or: [
+                  {
+                    createdAtToString: {
+                      $gte: filterByDateFrom,
+                      $lte: filterByDateTo,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            createdAtToString: 0,
+          },
+        },
+      );
+    }
+    return await this.aggregate(aggregation, offset, size);
+  }
+
+  private search(aggregation: any, searchTerm: string): void {
+    aggregation.push({
+      $match: {
+        $or: [{ title: new RegExp('^' + searchTerm, 'i') }],
+      },
+    });
   }
 
   private async httpGet(url: string, params: any): Promise<any> {

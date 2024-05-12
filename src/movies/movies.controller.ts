@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpCode,
   HttpStatus,
@@ -7,7 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import * as csvParser from 'csv-parser';
 import { createReadStream } from 'fs';
 import { Response } from 'express';
@@ -15,6 +16,7 @@ import { Response } from 'express';
 import { MoviesService } from './movies.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from 'src/uploads/uploads.service';
+import { SearchOptions } from 'src/core/shared/search-options.dto';
 
 @ApiTags('movies')
 @Controller({ version: '1', path: 'movies' })
@@ -28,6 +30,9 @@ export class MoviesController {
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'seed, store, and sync the data from uploaded CSV file',
+  })
   async syncMovies(
     @UploadedFile()
     file: Express.Multer.File,
@@ -68,5 +73,13 @@ export class MoviesController {
         await this.moviesService.m.insertMany(movies);
         res.json({ newlyAddedMovies: movies.length, movies });
       });
+  }
+
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'search movies' })
+  searchMovies(@Body() options: SearchOptions) {
+    console.log({ options });
+    return this.moviesService.findAll(options);
   }
 }
