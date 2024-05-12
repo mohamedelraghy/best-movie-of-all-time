@@ -24,7 +24,7 @@ export class UploadsService {
 
       return filename;
     } catch (err: unknown) {
-      console.log(err);
+      console.error(err);
       unlinkSync(file.path);
     }
   };

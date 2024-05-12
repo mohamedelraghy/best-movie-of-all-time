@@ -30,10 +30,8 @@ export class MoviesController {
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    console.log({ file });
     // * 1- Get CSV file path
     const path = this.uploadService.saveFile(file);
-    console.log({ path });
 
     // * 2- parse csv file
     const results = [];
@@ -41,7 +39,6 @@ export class MoviesController {
       .pipe(csvParser())
       .on('data', async (data) => {
         results.push(data);
-        console.log({ data });
         await this.moviesService.enrichMovieData(data.Title, data.Year);
       })
       .on('end', () => {});

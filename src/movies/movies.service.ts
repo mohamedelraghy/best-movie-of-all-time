@@ -58,8 +58,6 @@ export class MoviesService {
         i: imdb_id,
       });
 
-      console.log({ imdbMovie });
-
       return imdbMovie;
     } catch (error) {
       console.error(
@@ -83,13 +81,14 @@ export class MoviesService {
 
       // Fetch additional movie details from IMDB using TMDB ID
       const imdbMovie = await this.fetchAdditionalMovieDetailsFromIMDB(
-        tmdbMovie.tmdbId,
+        tmdbMovie.id,
       );
 
       // Merge data from both sources
       const enrichedMovie = {
         ...tmdbMovie,
-        ...imdbMovie,
+        genre: imdbMovie.Genre.split(','),
+        imdbDetails: imdbMovie,
       };
 
       return enrichedMovie;
