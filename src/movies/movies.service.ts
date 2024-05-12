@@ -2,15 +2,23 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
 import { ConfigService } from 'src/config/config.service';
+import { BaseService } from 'src/core/shared/base.service';
+import { Movie, MovieDoc } from './entities/movie.entity';
 
 @Injectable()
-export class MoviesService {
+export class MoviesService extends BaseService<MovieDoc> {
   private readonly logger = new Logger(MoviesService.name);
   constructor(
+    @InjectModel(Movie.name) readonly m: Model<MovieDoc>,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    super(m);
+  }
 
   /**
    * Description - Search for a movie using TMDB API
