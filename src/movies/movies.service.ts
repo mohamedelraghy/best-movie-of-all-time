@@ -12,89 +12,55 @@ export class MoviesService {
     private readonly configService: ConfigService,
   ) {}
 
-  async fetchMovieDetailsFromTMDB(title, year) {
+  /**
+   * Description - Search for a movie using TMDB API
+   * @param {string} title
+   * @param {string} year
+   * @returns {Promise<any>}
+   **/
+  async fetchMovieDetailsFromTMDB(title: string, year: string): Promise<any> {
     try {
-      const { data } = await firstValueFrom(
-        this.httpService
-          .get<any>('https://api.themoviedb.org/3/search/movie', {
-            params: {
-              api_key: this.configService.TMDB.api_key,
-              include_adult: false,
-              query: title,
-              year,
-            },
-          })
-          .pipe(
-            catchError((error: AxiosError) => {
-              this.logger.error(error.response.data);
-              throw 'An error happened!';
-            }),
-          ),
+      const data = await this.httpGet(
+        'https://api.themoviedb.org/3/search/movie',
+        {
+          api_key: this.configService.TMDB.api_key,
+          include_adult: false,
+          query: title,
+          year,
+        },
       );
 
-      const movie = data.results[0]; // Assuming we are taking the first result
-
-      console.log({ movie });
-
-      return {
-        title: movie.title,
-        releaseDate: movie.release_date,
-        tmdbId: movie.id,
-        // Add more relevant data from TMDB if needed
-      };
+      return data.results[0]; // Assuming we are taking the first result
     } catch (error) {
       console.error('Error fetching movie details from TMDB:', error);
       throw error;
     }
   }
 
-  async fetchAdditionalMovieDetailsFromIMDB(tmdbId) {
+  /**
+   * Description - fetch Additional Movie Details From IMDB
+   * @param {string} tmdbId
+   * @returns {Promise<any>}
+   **/
+  async fetchAdditionalMovieDetailsFromIMDB(tmdbId: string): Promise<any> {
     try {
       // Use TMDB ID to search for the corresponding IMDB ID
-
-      const { data } = await firstValueFrom(
-        this.httpService
-          .get(
-            'https://api.themoviedb.org/3/movie/' + tmdbId + '/external_ids',
-            {
-              params: {
-                api_key: this.configService.TMDB.api_key,
-              },
-            },
-          )
-          .pipe(
-            catchError((error: AxiosError) => {
-              this.logger.error(error.response.data);
-              throw 'An error happened!';
-            }),
-          ),
+      const { imdb_id } = await this.httpGet(
+        `https://api.themoviedb.org/3/movie/${tmdbId}/external_ids`,
+        {
+          api_key: this.configService.TMDB.api_key,
+        },
       );
-
-      const imdbId = data.imdb_id;
 
       // Fetch movie details from IMDB using the IMDB ID
-      const imdbResponse = await firstValueFrom(
-        this.httpService
-          .get('http://www.omdbapi.com/', {
-            params: {
-              apikey: this.configService.IMDB.api_key,
-              i: imdbId,
-            },
-          })
-          .pipe(
-            catchError((error: AxiosError) => {
-              this.logger.error(error.response.data);
-              throw 'An error happened!';
-            }),
-          ),
-      );
+      const imdbMovie = await this.httpGet('http://www.omdbapi.com/', {
+        apikey: this.configService.IMDB.api_key,
+        i: imdb_id,
+      });
 
-      const imdbMovie = imdbResponse.data;
-      return {
-        imdbRating: imdbMovie.imdbRating,
-        plot: imdbMovie.Plot,
-        // Add more relevant data from IMDB if needed
-      };
+      console.log({ imdbMovie });
+
+      return imdbMovie;
     } catch (error) {
       console.error(
         'Error fetching additional movie details from IMDB:',
@@ -104,6 +70,12 @@ export class MoviesService {
     }
   }
 
+  /**
+   * Description - collect movie details from TMDB & IMDB
+   * @param {any} title
+   * @param {any} year
+   * @returns {any}
+   **/
   async enrichMovieData(title, year) {
     try {
       // Fetch basic movie details from TMDB
@@ -119,8 +91,6 @@ export class MoviesService {
         ...tmdbMovie,
         ...imdbMovie,
       };
-
-      console.log({ enrichedMovie });
 
       return enrichedMovie;
     } catch (error) {
