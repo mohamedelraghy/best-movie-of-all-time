@@ -96,6 +96,7 @@ export class MoviesService extends BaseService<MovieDoc> {
       const enrichedMovie = {
         ...tmdbMovie,
         genre: imdbMovie.Genre.split(','),
+        tmdbId: tmdbMovie.id,
         imdbDetails: imdbMovie,
       };
 
