@@ -128,4 +128,17 @@ export class MoviesService {
       throw error;
     }
   }
+
+  private async httpGet(url: string, params: any): Promise<any> {
+    const { data } = await firstValueFrom(
+      this.httpService.get(url, { params }).pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response.data);
+          throw 'An error happened!';
+        }),
+      ),
+    );
+
+    return data;
+  }
 }
