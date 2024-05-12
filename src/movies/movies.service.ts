@@ -72,11 +72,11 @@ export class MoviesService {
 
   /**
    * Description - collect movie details from TMDB & IMDB
-   * @param {any} title
-   * @param {any} year
-   * @returns {any}
+   * @param {string} title
+   * @param {string} year
+   * @returns {Promise<any>}
    **/
-  async enrichMovieData(title, year) {
+  async enrichMovieData(title: string, year: string): Promise<any> {
     try {
       // Fetch basic movie details from TMDB
       const tmdbMovie = await this.fetchMovieDetailsFromTMDB(title, year);
