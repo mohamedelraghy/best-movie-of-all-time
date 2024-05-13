@@ -29,8 +29,14 @@ export class EnvironmentVariables {
   API_URL: string;
 
   @IsString()
-  TMDB_API_KEY;
+  TMDB_API_KEY: string;
 
   @IsString()
-  IMDB_API_KEY;
+  TMDB_ACCOUNT_ID: string;
+
+  @IsString()
+  TMDB_TOKEN: string;
+
+  @IsString()
+  IMDB_API_KEY: string;
 }

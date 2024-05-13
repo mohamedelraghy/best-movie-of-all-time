@@ -84,7 +84,11 @@ export class ConfigService {
   }
 
   get TMDB() {
-    return { api_key: this.envConfig.TMDB_API_KEY };
+    return {
+      api_key: this.envConfig.TMDB_API_KEY,
+      account_id: this.envConfig.TMDB_ACCOUNT_ID,
+      token: this.envConfig.TMDB_TOKEN,
+    };
   }
   get IMDB() {
     return { api_key: this.envConfig.IMDB_API_KEY };
