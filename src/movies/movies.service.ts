@@ -10,6 +10,7 @@ import { BaseService } from 'src/core/shared/base.service';
 import { Movie, MovieDoc } from './entities/movie.entity';
 import { SearchOptions } from 'src/core/shared/search-options.dto';
 import { Pagination } from 'src/core/shared/pagination.dto';
+import { WatchlistDto } from './dto/watchlist.dto';
 
 @Injectable()
 export class MoviesService extends BaseService<MovieDoc> {
@@ -97,9 +98,9 @@ export class MoviesService extends BaseService<MovieDoc> {
       // Merge data from both sources
       const enrichedMovie = {
         ...tmdbMovie,
-        genre: imdbMovie.Genre.split(','),
+        genre: imdbMovie.Genre.split(',').map((genre) => genre.trim()),
         tmdbId: tmdbMovie.id,
-        imdbDetails: imdbMovie,
+        // imdbDetails: imdbMovie,
       };
 
       return enrichedMovie;
@@ -174,9 +175,34 @@ export class MoviesService extends BaseService<MovieDoc> {
   private search(aggregation: any, searchTerm: string): void {
     aggregation.push({
       $match: {
-        $or: [{ title: new RegExp('^' + searchTerm, 'i') }],
+        $or: [
+          { title: new RegExp('^' + searchTerm, 'i') },
+          { overview: new RegExp('^' + searchTerm, 'i') },
+          { title: new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Title': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Director': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Writer': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Actors': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Plot': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Country': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Awards': new RegExp('^' + searchTerm, 'i') },
+          { 'imdbDetails.Poster': new RegExp('^' + searchTerm, 'i') },
+        ],
       },
     });
+  }
+
+  async httpPost(url: string, body: WatchlistDto, headers: any): Promise<any> {
+    const { data } = await firstValueFrom(
+      this.httpService.post(url, body, { headers }).pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response.data);
+          throw 'An error happened!';
+        }),
+      ),
+    );
+
+    return data;
   }
 
   private async httpGet(url: string, params: any): Promise<any> {
