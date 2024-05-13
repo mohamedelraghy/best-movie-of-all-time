@@ -17,6 +17,8 @@ import { MoviesService } from './movies.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from 'src/uploads/uploads.service';
 import { SearchOptions } from 'src/core/shared/search-options.dto';
+import { WatchlistDto } from './dto/watchlist.dto';
+import { ConfigService } from 'src/config/config.service';
 
 @ApiTags('movies')
 @Controller({ version: '1', path: 'movies' })
@@ -24,6 +26,7 @@ export class MoviesController {
   constructor(
     private readonly moviesService: MoviesService,
     private readonly uploadService: UploadsService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post('sync')
@@ -81,5 +84,20 @@ export class MoviesController {
   searchMovies(@Body() options: SearchOptions) {
     console.log({ options });
     return this.moviesService.findAll(options);
+  }
+
+  @Post('add/watchlist')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'add or remove from watchlist' })
+  watchlist(@Body() dto: WatchlistDto) {
+    const headers = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      Authorization: `Bearer ${this.configService.TMDB.token}`,
+    };
+
+    const url = `https://api.themoviedb.org/3/account/${this.configService.TMDB.account_id}/watchlist`;
+
+    return this.moviesService.httpPost(url, dto, headers);
   }
 }
