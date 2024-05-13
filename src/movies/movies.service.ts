@@ -11,7 +11,7 @@ import { Movie, MovieDoc } from './entities/movie.entity';
 import { SearchOptions } from 'src/core/shared/search-options.dto';
 import { Pagination } from 'src/core/shared/pagination.dto';
 import { FavoriteDto } from './dto/favorite.dto';
-import { WatchlistDto } from './dto/watchlist.dto copy';
+import { WatchlistDto } from './dto/watchlist.dto';
 
 @Injectable()
 export class MoviesService extends BaseService<MovieDoc> {
@@ -191,6 +191,14 @@ export class MoviesService extends BaseService<MovieDoc> {
         ],
       },
     });
+  }
+
+  async populateIMDB(movies) {
+    for (const movie of movies) {
+      const { imdbDetails } = await this.findOne({ tmdbId: movie.id });
+      movie.imdbDetails = imdbDetails;
+    }
+    return movies;
   }
 
   async httpPost(

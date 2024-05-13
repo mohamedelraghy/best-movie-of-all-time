@@ -23,7 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from 'src/uploads/uploads.service';
 import { SearchOptions } from 'src/core/shared/search-options.dto';
 import { FavoriteDto } from './dto/favorite.dto';
-import { WatchlistDto } from './dto/watchlist.dto copy';
+import { WatchlistDto } from './dto/watchlist.dto';
 import { ConfigService } from 'src/config/config.service';
 
 @ApiTags('movies')
@@ -98,7 +98,19 @@ export class MoviesController {
   @Post('add/watchlist')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'add or remove from watchlist' })
-  watchlist(@Body() dto: WatchlistDto) {
+  async watchlist(@Body() dto: WatchlistDto) {
+    // * 1- get some Details from imdb & store into DB
+    const imdbMovie =
+      await this.moviesService.fetchAdditionalMovieDetailsFromIMDB(
+        dto.media_id,
+      );
+
+    await this.moviesService.m.findOneAndUpdate(
+      { tmdbId: dto.media_id },
+      { imdbDetails: imdbMovie },
+    );
+
+    // * use TMDB to add movie to watchlist
     const headers = {
       accept: 'application/json',
       'content-type': 'application/json',
@@ -136,13 +148,31 @@ export class MoviesController {
       ),
     );
 
-    return data;
+    const { results } = data;
+    const moviesWithIMDBDetails =
+      await this.moviesService.populateIMDB(results);
+
+    console.log({ moviesWithIMDBDetails });
+
+    return { ...data, results: moviesWithIMDBDetails };
   }
 
   @Post('add/favorite')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'add or remove from favorite' })
-  favorite(@Body() dto: FavoriteDto) {
+  async favorite(@Body() dto: FavoriteDto) {
+    // * 1- get some Details from imdb & store into DB
+    const imdbMovie =
+      await this.moviesService.fetchAdditionalMovieDetailsFromIMDB(
+        dto.media_id,
+      );
+
+    await this.moviesService.m.findOneAndUpdate(
+      { tmdbId: dto.media_id },
+      { imdbDetails: imdbMovie },
+    );
+
+    // *2- use TMDB api to add movie to favorite
     const headers = {
       accept: 'application/json',
       'content-type': 'application/json',
@@ -180,6 +210,12 @@ export class MoviesController {
       ),
     );
 
-    return data;
+    const { results } = data;
+    const moviesWithIMDBDetails =
+      await this.moviesService.populateIMDB(results);
+
+    console.log({ moviesWithIMDBDetails });
+
+    return { ...data, results: moviesWithIMDBDetails };
   }
 }
