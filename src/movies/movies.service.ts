@@ -10,7 +10,8 @@ import { BaseService } from 'src/core/shared/base.service';
 import { Movie, MovieDoc } from './entities/movie.entity';
 import { SearchOptions } from 'src/core/shared/search-options.dto';
 import { Pagination } from 'src/core/shared/pagination.dto';
-import { WatchlistDto } from './dto/watchlist.dto';
+import { FavoriteDto } from './dto/favorite.dto';
+import { WatchlistDto } from './dto/watchlist.dto copy';
 
 @Injectable()
 export class MoviesService extends BaseService<MovieDoc> {
@@ -192,7 +193,11 @@ export class MoviesService extends BaseService<MovieDoc> {
     });
   }
 
-  async httpPost(url: string, body: WatchlistDto, headers: any): Promise<any> {
+  async httpPost(
+    url: string,
+    body: WatchlistDto | FavoriteDto,
+    headers: any,
+  ): Promise<any> {
     const { data } = await firstValueFrom(
       this.httpService.post(url, body, { headers }).pipe(
         catchError((error: AxiosError) => {
