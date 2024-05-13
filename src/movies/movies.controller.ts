@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
   Res,
   UploadedFile,
@@ -12,21 +14,28 @@ import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import * as csvParser from 'csv-parser';
 import { createReadStream } from 'fs';
 import { Response } from 'express';
+import { HttpService } from '@nestjs/axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 
 import { MoviesService } from './movies.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from 'src/uploads/uploads.service';
 import { SearchOptions } from 'src/core/shared/search-options.dto';
-import { WatchlistDto } from './dto/watchlist.dto';
+import { FavoriteDto } from './dto/favorite.dto';
+import { WatchlistDto } from './dto/watchlist.dto copy';
 import { ConfigService } from 'src/config/config.service';
 
 @ApiTags('movies')
 @Controller({ version: '1', path: 'movies' })
 export class MoviesController {
+  private readonly logger = new Logger(MoviesController.name);
+
   constructor(
     private readonly moviesService: MoviesService,
     private readonly uploadService: UploadsService,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   @Post('sync')
@@ -99,5 +108,78 @@ export class MoviesController {
     const url = `https://api.themoviedb.org/3/account/${this.configService.TMDB.account_id}/watchlist`;
 
     return this.moviesService.httpPost(url, dto, headers);
+  }
+
+  @Get('list/watchlist')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'list movies from watchlist' })
+  async listWatchlist() {
+    const headers = {
+      accept: 'application/json',
+      Authorization: `Bearer ${this.configService.TMDB.token}`,
+    };
+
+    const params = {
+      language: 'en-US',
+      page: 1,
+      sort_by: 'created_at.asc',
+    };
+
+    const url = `https://api.themoviedb.org/3/account/${this.configService.TMDB.account_id}/watchlist/movies`;
+
+    const { data } = await firstValueFrom(
+      this.httpService.get(url, { headers, params }).pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response.data);
+          throw 'An error happened!';
+        }),
+      ),
+    );
+
+    return data;
+  }
+
+  @Post('add/favorite')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'add or remove from favorite' })
+  favorite(@Body() dto: FavoriteDto) {
+    const headers = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      Authorization: `Bearer ${this.configService.TMDB.token}`,
+    };
+
+    const url = `https://api.themoviedb.org/3/account/${this.configService.TMDB.account_id}/favorite`;
+
+    return this.moviesService.httpPost(url, dto, headers);
+  }
+
+  @Get('list/favorite')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'list movies from favorite' })
+  async listFavorite() {
+    const headers = {
+      accept: 'application/json',
+      Authorization: `Bearer ${this.configService.TMDB.token}`,
+    };
+
+    const params = {
+      language: 'en-US',
+      page: 1,
+      sort_by: 'created_at.asc',
+    };
+
+    const url = `https://api.themoviedb.org/3/account/${this.configService.TMDB.account_id}/favorite/movies`;
+
+    const { data } = await firstValueFrom(
+      this.httpService.get(url, { headers, params }).pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response.data);
+          throw 'An error happened!';
+        }),
+      ),
+    );
+
+    return data;
   }
 }
