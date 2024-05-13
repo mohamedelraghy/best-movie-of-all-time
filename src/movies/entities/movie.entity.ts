@@ -33,8 +33,8 @@ export class Movie extends BaseEntity {
   @Prop({ type: [String], required: true })
   genre: string[];
 
-  @Prop({ type: Object, required: true })
-  imdbDetails: object;
+  @Prop({ type: Object, required: false })
+  imdbDetails?: object;
 }
 
 export const MovieSchema = SchemaFactory.createForClass(Movie);
