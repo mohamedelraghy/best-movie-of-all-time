@@ -163,8 +163,6 @@ export class MoviesController {
     const moviesWithIMDBDetails =
       await this.moviesService.populateIMDB(results);
 
-    console.log({ moviesWithIMDBDetails });
-
     return { ...data, results: moviesWithIMDBDetails };
   }
 
@@ -224,8 +222,6 @@ export class MoviesController {
     const { results } = data;
     const moviesWithIMDBDetails =
       await this.moviesService.populateIMDB(results);
-
-    console.log({ moviesWithIMDBDetails });
 
     return { ...data, results: moviesWithIMDBDetails };
   }
