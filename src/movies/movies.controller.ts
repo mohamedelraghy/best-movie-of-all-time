@@ -10,7 +10,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import * as csvParser from 'csv-parser';
 import { createReadStream } from 'fs';
 import { Response } from 'express';
@@ -41,6 +41,17 @@ export class MoviesController {
   @Post('sync')
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'seed, store, and sync the data from uploaded CSV file',
