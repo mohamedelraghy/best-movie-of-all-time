@@ -31,7 +31,7 @@ $ npm i
 1. Development mode
 
 ```bash
-$ cp config/.env.example  .env.development
+$ cp config/.env.example  config/.env.development
 
 # development
 $ npm run start
