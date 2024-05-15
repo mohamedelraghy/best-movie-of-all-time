@@ -209,7 +209,7 @@ export class MoviesService extends BaseService<MovieDoc> {
     const { data } = await firstValueFrom(
       this.httpService.post(url, body, { headers }).pipe(
         catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
+          this.logger.error(error);
           throw 'An error happened!';
         }),
       ),
@@ -222,7 +222,7 @@ export class MoviesService extends BaseService<MovieDoc> {
     const { data } = await firstValueFrom(
       this.httpService.get(url, { params }).pipe(
         catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
+          this.logger.error(error);
           throw 'An error happened!';
         }),
       ),
