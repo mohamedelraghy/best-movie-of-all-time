@@ -17,9 +17,23 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
       - /usr/src/app/dist
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/best-movie
+
+  mongo:
+    image: mongo:latest
+    container_name: best-movie-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    networks:
+      - overlay
+    volumes:
+      - mongo_data:/data/db
 
 volumes:
   shared_database:
+  mongo_data:
 
 networks:
   overlay:
