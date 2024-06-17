@@ -44,8 +44,8 @@ export class MoviesService extends BaseService<MovieDoc> {
 
       return data.results[0]; // Assuming we are taking the first result
     } catch (error) {
-      console.error('Error fetching movie details from TMDB:', error);
-      throw error;
+      this.logger.error(error);
+      throw new Error(error);
     }
   }
 
@@ -72,11 +72,8 @@ export class MoviesService extends BaseService<MovieDoc> {
 
       return imdbMovie;
     } catch (error) {
-      console.error(
-        'Error fetching additional movie details from IMDB:',
-        error,
-      );
-      throw error;
+      this.logger.error(error);
+      throw new Error(error);
     }
   }
 
@@ -106,8 +103,8 @@ export class MoviesService extends BaseService<MovieDoc> {
 
       return enrichedMovie;
     } catch (error) {
-      console.error('Error enriching movie data:', error);
-      throw error;
+      this.logger.error(error);
+      throw new Error(error);
     }
   }
 
@@ -173,6 +170,20 @@ export class MoviesService extends BaseService<MovieDoc> {
     return await this.aggregate(aggregation, offset, size);
   }
 
+  /**
+   * Retrieves a paginated list of movies based on the provided search options.
+   *
+   * @param {SearchOptions} options - The search options to apply.
+   * @param {string[]} options.sort - The fields to sort the movies by.
+   * @param {string} options.dir - The direction of the sorting (asc or desc).
+   * @param {number} options.offset - The number of movies to skip.
+   * @param {number} options.size - The maximum number of movies to return.
+   * @param {string} options.searchTerm - The search term to match against.
+   * @param {Record<string, any>[]} options.filterBy - The filters to apply.
+   * @param {string} options.filterByDateFrom - The start date for filtering by date.
+   * @param {string} options.filterByDateTo - The end date for filtering by date.
+   * @returns {Promise<Pagination>} - A promise that resolves to the paginated list of movies.
+   */
   private search(aggregation: any, searchTerm: string): void {
     aggregation.push({
       $match: {
@@ -210,7 +221,7 @@ export class MoviesService extends BaseService<MovieDoc> {
       this.httpService.post(url, body, { headers }).pipe(
         catchError((error: AxiosError) => {
           this.logger.error(error);
-          throw 'An error happened!';
+          throw new Error('An error happened!');
         }),
       ),
     );
@@ -223,7 +234,7 @@ export class MoviesService extends BaseService<MovieDoc> {
       this.httpService.get(url, { params }).pipe(
         catchError((error: AxiosError) => {
           this.logger.error(error);
-          throw 'An error happened!';
+          throw new Error('An error happened!');
         }),
       ),
     );
