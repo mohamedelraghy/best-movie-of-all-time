@@ -17,6 +17,7 @@ export class CacheModuleConfig implements CacheOptionsFactory {
             host: 'localhost',
             port: 6379,
           },
+          ttl: 10,
         }),
     };
   }
