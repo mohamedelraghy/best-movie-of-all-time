@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { redisStore } from 'cache-manager-redis-store';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RedisClientOptions } from 'redis';
 
@@ -11,6 +10,7 @@ import { ConfigModuleConfig } from './config/options/config.config';
 import { UploadsModule } from './uploads/uploads.module';
 import { MongooseModuleConfig } from './config/options/database.config';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { CacheModuleConfig } from './config/options/cache.config';
 
 @Module({
   imports: [
@@ -22,17 +22,8 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
       useClass: MongooseModuleConfig,
       imports: [ConfigModule.Deferred],
     }),
-    CacheModule.register<RedisClientOptions>({
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      store: async () =>
-        await redisStore({
-          // Store-specific configuration:
-          socket: {
-            host: 'localhost',
-            port: 6379,
-          },
-        }),
+    CacheModule.registerAsync<RedisClientOptions>({
+      useClass: CacheModuleConfig,
     }),
   ],
   controllers: [],
