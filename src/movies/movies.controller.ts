@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
   Post,
+  Query,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -98,10 +99,10 @@ export class MoviesController {
       });
   }
 
-  @Post('search')
+  @Get('search')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'search movies' })
-  searchMovies(@Body() options: SearchOptions) {
+  searchMovies(@Query() options: SearchOptions) {
     console.log({ options });
     return this.moviesService.findAll(options);
   }

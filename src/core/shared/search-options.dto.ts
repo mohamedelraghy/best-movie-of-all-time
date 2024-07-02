@@ -22,15 +22,18 @@ export class SearchOptions {
    */
   @IsNumber()
   @Min(0)
-  @ApiProperty()
+  @Transform(({ value }) => parseInt(value, 10))
+  @ApiProperty({ type: Number, example: 0 })
   offset: number;
 
   /**
    * Number of records to return in 1 page.
    * @example 10
    */
+  @IsNumber()
   @IsPositive()
-  @ApiProperty({ example: 10 })
+  @Transform(({ value }) => parseInt(value, 10))
+  @ApiProperty({ type: Number, example: 10 })
   size: number;
 
   /**
@@ -38,7 +41,7 @@ export class SearchOptions {
    */
   @IsOptional()
   @IsString()
-  @ApiProperty({ example: '' })
+  @ApiProperty({ example: '', required: false })
   sort? = '';
 
   /**
@@ -47,7 +50,7 @@ export class SearchOptions {
    */
   @IsOptional()
   @IsIn(['asc', 'desc'])
-  @ApiProperty({ example: 'asc' })
+  @ApiProperty({ example: 'asc', required: false })
   dir?: string;
 
   /**
@@ -56,7 +59,7 @@ export class SearchOptions {
   @IsOptional()
   @IsString()
   @Transform(({ value }) => escapeRegexSpecialCharacters(value))
-  @ApiProperty({ example: '' })
+  @ApiProperty({ example: '', required: false })
   searchTerm? = '';
 
   /**
@@ -66,7 +69,7 @@ export class SearchOptions {
   @IsOptional()
   @IsArray()
   @IsObject({ each: true })
-  @ApiProperty({ example: [] })
+  @ApiProperty({ example: [], required: false })
   filterBy?: Record<string, any>[] = [];
 
   /**
@@ -75,7 +78,7 @@ export class SearchOptions {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @ApiProperty({ example: [] })
+  @ApiProperty({ example: [], required: false })
   attributesToRetrieve?: string[] = [];
 
   /**
@@ -83,7 +86,7 @@ export class SearchOptions {
    */
   @IsOptional()
   @IsString()
-  @ApiProperty({ type: String, example: '2022-01-01' })
+  @ApiProperty({ type: String, required: false, example: '2022-01-01' })
   filterByDateFrom?: string;
 
   /**
@@ -91,6 +94,6 @@ export class SearchOptions {
    */
   @IsOptional()
   @IsString()
-  @ApiProperty({ type: String, example: '2022-01-02' })
+  @ApiProperty({ type: String, required: false, example: '2022-01-02' })
   filterByDateTo?: string;
 }
