@@ -14,7 +14,7 @@ export class CacheModuleConfig implements CacheOptionsFactory {
         await redisStore({
           // Store-specific configuration:
           socket: {
-            host: 'localhost',
+            host: 'redis',
             port: 6379,
           },
           ttl: 10,

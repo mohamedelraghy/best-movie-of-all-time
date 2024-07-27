@@ -17,8 +17,6 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
       - /usr/src/app/dist
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/best-movie
 
   mongo:
     image: mongo:latest
@@ -31,9 +29,20 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  redis:
+    image: redis
+    container_name: best-movie-redis
+    restart: always
+    networks:
+      - overlay
+    volumes:
+      - redis_data:/data
+
 volumes:
   shared_database:
   mongo_data:
+  redis_data:
+    driver: local
 
 networks:
   overlay:
