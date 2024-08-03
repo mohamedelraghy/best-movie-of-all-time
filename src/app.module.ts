@@ -24,6 +24,7 @@ import { CacheModuleConfig } from './config/options/cache.config';
     }),
     CacheModule.registerAsync<RedisClientOptions>({
       useClass: CacheModuleConfig,
+      imports: [ConfigModule.Deferred],
     }),
   ],
   controllers: [],
