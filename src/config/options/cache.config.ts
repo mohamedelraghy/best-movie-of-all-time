@@ -1,9 +1,11 @@
 import { CacheOptions, CacheOptionsFactory } from '@nestjs/cache-manager';
 import { Injectable } from '@nestjs/common';
 import { redisStore } from 'cache-manager-redis-store';
+import { ConfigService } from '../config.service';
 
 @Injectable()
 export class CacheModuleConfig implements CacheOptionsFactory {
+  constructor(private readonly configService: ConfigService) {}
   createCacheOptions():
     | CacheOptions<Record<string, any>>
     | Promise<CacheOptions<Record<string, any>>> {
@@ -14,8 +16,8 @@ export class CacheModuleConfig implements CacheOptionsFactory {
         await redisStore({
           // Store-specific configuration:
           socket: {
-            host: 'redis',
-            port: 6379,
+            host: this.configService.REDIS.host,
+            port: this.configService.REDIS.port,
           },
           ttl: 10,
         }),
