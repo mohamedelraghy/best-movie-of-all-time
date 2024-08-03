@@ -93,4 +93,11 @@ export class ConfigService {
   get IMDB() {
     return { api_key: this.envConfig.IMDB_API_KEY };
   }
+
+  get REDIS() {
+    return {
+      host: this.envConfig.REDIS_HOST,
+      port: this.envConfig.REDIS_PORT,
+    };
+  }
 }

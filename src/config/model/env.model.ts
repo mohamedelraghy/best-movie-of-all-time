@@ -39,4 +39,10 @@ export class EnvironmentVariables {
 
   @IsString()
   IMDB_API_KEY: string;
+
+  @IsString()
+  REDIS_HOST: string;
+
+  @IsNumber()
+  REDIS_PORT: number;
 }
